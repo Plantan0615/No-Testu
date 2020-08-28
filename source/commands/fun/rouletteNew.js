@@ -1,7 +1,6 @@
 const sql = require("better-sqlite3")("/Users/chase/Desktop/Coding/No Testu/source/userInfo.db");
 const discord = require("discord.js");
 module.exports.run = async(client, message, args) => {
-    console.log("it runs")
 // roulette functions
 //wheel
 var wheel ={
@@ -57,17 +56,12 @@ var colour = pickColour();
         var group = numGroup();
 //user input
 let msgArray = args // sets up array
-console.log(msgArray)
-let guessType = msgArray[0]; //colour number even/odd- black, red, green
-console.log(guessType)
+let guessType = msgArray[0]; //colour number even/odd- black, red, gree
 let guess = msgArray[1]; //black/red even/odd low/high- a single number
-console.log(guess)
 let wager = msgArray [2]; //5, 10, Moneys
-console.log(wager)
 //valid guessType check
 let isValidType = ["color", "colour", "even/odd", "numbers", "number", "black", "red", "green"]
 let validType = isValidType.includes(guessType)
-console.log(validType)
     //if no guess type
     if(!guessType) {
         message.delete({ timeout: 4000 })
@@ -110,6 +104,8 @@ console.log(validType)
     let isValidRed = ["33", "20", "22", "26", "35", "28", "37", "31", "24", "6", "17", "2", "15", "10", "19", "8", "13", "4"]
     let isValidBlack = ["16","5", "3", "18", "7", "14", "12", "9", "11", "25", "34", "21", "32", "23", "30", "29", "36", "27"]
     let isValidGreen = ["1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1"]
+    let groups = ["colour", "color", "number", "numbers", "even/odd"]
+    let single = ["green", "red", "black"]
         //check if message content is in array based on guess type
         if(guessType === "colour" || guessType === "color"){valid = isValidColour.includes(guess)} //compares guess to isValidColour returns true or false
         else if(guessType === "even/odd"){valid = isValidEvenOdd.includes(guess)}                       //checks if user input is correct
@@ -117,9 +113,7 @@ console.log(validType)
         else if(guessType === "black"){valid = isValidBlack.includes(guess)}
         else if(guessType === "red"){valid = isValidRed.includes(guess)}
         else if(guessType === "green"){valid = isValidGreen.includes(guess)}
-        console.log(valid);
         //if invalid guess for groups
-        let groups = ["colour", "color", "number", "numbers", "even/odd"]
         if (valid === false && groups.includes(guessType)) {
             message.delete({ timeout: 4000 })
             message.channel.send("Invalid Betting Option. Please type red, black, even, odd, low (for numbers 1-18), or high (for numbers 19-37) after the guess type.")
@@ -127,42 +121,8 @@ console.log(validType)
                 .catch(err => console.log(err));
             return;
         }
-        //if invalid num for single
-        else if(valid === false){
-            message.delete({timeout: 4000})
-            message.channel.send("Number/Colour combination does not exist. (If you need help- Look at a Roulette Wheel and add 1 to the number you want to bet on.)")
-                .then(msg => msg.delete({timeout: 4000}))
-                .catch(err => console.log(err));
-            return;
-        }
-    }
-    //if all is well
-    else {
-        //get user moneys
-        let userID = message.author.id
-        let prepareStatement = sql.prepare("SELECT * FROM data WHERE userID = ?")//select all(*) from the table called data (based on the column called userID)
-        let userXpObject= prepareStatement.get(`${userID}`) //creates object with * (all) the user info in, on the row with the matching userID
-            let newMoneys = parseInt(wager);// parseInt turns strings into integers- we are turning the user input into a usable number
-            let currentMoneys = userXpObject["userMoneys"];
-            //if wager is NAN
-            if(isNaN(newMoneys)){
-                message.delete({ timeout: 2000 })
-                message.channel.send("Your wager must be a number!")
-                    .then(msg => msg.delete({timeout: 2000}))
-                    .catch(err => console.log(err));
-                return;
-            }
-            //if wager > moneys
-            if (wager > currentMoneys){
-                message.delete({ timeout: 2000 })
-                message.channel.send("Your wager is higher than the Moneys you have!")
-                    .then(msg => msg.delete({timeout: 2000}))
-                    .catch(err => console.log(err));
-                return;
-            }
-        //SINGLE GUESS
-        let single = ["green", "red", "black"]
-        if (single.includes(guessType)) {
+        //if guess type is single
+        else if (valid === false && single.includes(guessType)) {
             let numGuess = parseInt(msgArray[1]); //number guess
             //if numGuess is NaN
             if(isNaN(numGuess)){
@@ -172,23 +132,58 @@ console.log(validType)
                     .catch(err => console.log(err));
                 return;
             }
+            //if invalid num
             else {
-            //if colour is right
+                message.delete({timeout: 4000})
+                message.channel.send("Number/Colour combination does not exist. (If you need help- Look at a Roulette Wheel and add 1 to the number you want to bet on.)")
+                    .then(msg => msg.delete({timeout: 4000}))
+                    .catch(err => console.log(err));
+                return;
+            }
+        }
+        //if all is well
+        else {
+            //get user moneys
+            let userID = message.author.id
+            let prepareStatement = sql.prepare("SELECT * FROM data WHERE userID = ?")//select all(*) from the table called data (based on the column called userID)
+            let userXpObject= prepareStatement.get(`${userID}`) //creates object with * (all) the user info in, on the row with the matching userID
+                let newMoneys = parseInt(wager);// parseInt turns strings into integers- we are turning the user input into a usable number
+                let currentMoneys = userXpObject["userMoneys"];
+                //if wager is NAN
+                if(isNaN(newMoneys)){
+                    message.delete({ timeout: 2000 })
+                    message.channel.send("Your wager must be a number!")
+                        .then(msg => msg.delete({timeout: 2000}))
+                        .catch(err => console.log(err));
+                    return;
+                }
+                //if wager > moneys
+                if (wager > currentMoneys){
+                    message.delete({ timeout: 2000 })
+                    message.channel.send("Your wager is higher than the Moneys you have!")
+                        .then(msg => msg.delete({timeout: 2000}))
+                        .catch(err => console.log(err));
+                    return;
+                }
+            //SINGLE GUESS
+            if (single.includes(guessType)) {
+                let numGuess = parseInt(msgArray[1]); //number guess
+                //if colour is right
                 if (guessType === colour) {
-                //win case
+                    //win case
                     if (numGuess === num) {
-                    let finalMoneys = newMoneys + currentMoneys
-                    let prepareUpdate = sql.prepare(`UPDATE data SET userMoneys = ? WHERE userID = ?`)
-                    prepareUpdate.run(finalMoneys, userID);
+                        let finalMoneys = newMoneys + currentMoneys
+                        let prepareUpdate = sql.prepare(`UPDATE data SET userMoneys = ? WHERE userID = ?`)
+                        prepareUpdate.run(finalMoneys, userID);
 
-                    const winEmbed = new discord.MessageEmbed()
-                    .setTitle("The ball landed on " + colour + " " + num )
-                    .setDescription("You Win " + wager + " Moneys!")
-                    .setColor("#0f5718")
-                    message.channel.send(winEmbed)
+                        const winEmbed = new discord.MessageEmbed()
+                        .setTitle("The ball landed on " + colour + " " + num )
+                        .setDescription("You Win " + wager + " Moneys!")
+                        .setColor("#0f5718")
+                        message.channel.send(winEmbed)
                     }
-                //lose case
-                    else if(numGuess !== num){
+                    //lose case
+                    else if(numGuess !== num) {
                         let finalMoneys = currentMoneys - newMoneys;
                         let prepareUpdate = sql.prepare(`UPDATE data SET userMoneys = ? WHERE userID = ?`)
                         prepareUpdate.run(finalMoneys, userID);
@@ -201,7 +196,7 @@ console.log(validType)
                     }
                 }
             //if colour is wrong- lose case
-                else if (guessType !== colour){
+                else if (guessType !== colour) {
                     let finalMoneys = currentMoneys - newMoneys;
                     let prepareUpdate = sql.prepare(`UPDATE data SET userMoneys = ? WHERE userID = ?`)
                     prepareUpdate.run(finalMoneys, userID);
@@ -213,88 +208,88 @@ console.log(validType)
                     message.channel.send(loseEmbed)
                 }
             }
-        }
-        //GROUP GUESSES
-        else {
-            //if colour guess
-            if (guessType === "colour" || guessType === "color"){
-                //win case
-                if (guess === colour){
-                    let finalMoneys = newMoneys + currentMoneys
-                    let prepareUpdate = sql.prepare(`UPDATE data SET userMoneys = ? WHERE userID = ?`)
-                    prepareUpdate.run(finalMoneys, userID);
+            //GROUP GUESSES
+            else {
+                //if colour guess
+                if (guessType === "colour" || guessType === "color"){
+                    //win case
+                    if (guess === colour){
+                        let finalMoneys = newMoneys + currentMoneys
+                        let prepareUpdate = sql.prepare(`UPDATE data SET userMoneys = ? WHERE userID = ?`)
+                        prepareUpdate.run(finalMoneys, userID);
 
-                    const winEmbed = new discord.MessageEmbed()
-                    .setTitle("The ball landed on " + colour + " " + num )
-                    .setDescription("You Win " + wager + " Moneys!")
-                    .setColor("#0f5718")
-                    message.channel.send(winEmbed)
+                        const winEmbed = new discord.MessageEmbed()
+                        .setTitle("The ball landed on " + colour + " " + num )
+                        .setDescription("You Win " + wager + " Moneys!")
+                        .setColor("#0f5718")
+                        message.channel.send(winEmbed)
+                    }
+                    //lose case
+                    else {
+                        let finalMoneys = currentMoneys - newMoneys;
+                        let prepareUpdate = sql.prepare(`UPDATE data SET userMoneys = ? WHERE userID = ?`)
+                        prepareUpdate.run(finalMoneys, userID);
+
+                        const loseEmbed = new discord.MessageEmbed()
+                        .setTitle("The ball landed on " + colour + " " + num )
+                        .setDescription("You Lost " + wager + " Moneys!")
+                        .setColor("#ec2727")
+                        message.channel.send(loseEmbed)
+                    }
                 }
-                //lose case
-                else {
-                    let finalMoneys = currentMoneys - newMoneys;
-                    let prepareUpdate = sql.prepare(`UPDATE data SET userMoneys = ? WHERE userID = ?`)
-                    prepareUpdate.run(finalMoneys, userID);
+                //if even odd guess
+                if(guessType === "even/odd"){
+                    //win case
+                    if (guess === compare){
+                        let finalMoneys = newMoneys + currentMoneys
+                        let prepareUpdate = sql.prepare(`UPDATE data SET userMoneys = ? WHERE userID = ?`)
+                        prepareUpdate.run(finalMoneys, userID);
 
-                    const loseEmbed = new discord.MessageEmbed()
-                    .setTitle("The ball landed on " + colour + " " + num )
-                    .setDescription("You Lost " + wager + " Moneys!")
-                    .setColor("#ec2727")
-                    message.channel.send(loseEmbed)
+                        const winEmbed = new discord.MessageEmbed()
+                        .setTitle("The ball landed on " + colour + " " + num )
+                        .setDescription("You Win " + wager + " Moneys!")
+                        .setColor("#0f5718")
+                        message.channel.send(winEmbed)
+                    }
+                    //lose case
+                    else {
+                        let finalMoneys = currentMoneys - newMoneys;
+                        let prepareUpdate = sql.prepare(`UPDATE data SET userMoneys = ? WHERE userID = ?`)
+                        prepareUpdate.run(finalMoneys, userID);
+
+                        const loseEmbed = new discord.MessageEmbed()
+                        .setTitle("The ball landed on " + colour + " " + num )
+                        .setDescription("You Lost " + wager + " Moneys!")
+                        .setColor("#ec2727")
+                        message.channel.send(loseEmbed)
+                    }
                 }
-            }
-            //if even odd guess
-            if(guessType === "even/odd"){
-                //win case
-                if (guess === compare){
-                    let finalMoneys = newMoneys + currentMoneys
-                    let prepareUpdate = sql.prepare(`UPDATE data SET userMoneys = ? WHERE userID = ?`)
-                    prepareUpdate.run(finalMoneys, userID);
+                //if number guess
+                if(guessType === "number" || guessType === "numbers"){
+                    //win case
+                    if (guess === group) {
+                        let finalMoneys = newMoneys + currentMoneys
+                        let prepareUpdate = sql.prepare(`UPDATE data SET userMoneys = ? WHERE userID = ?`)
+                        prepareUpdate.run(finalMoneys, userID);
 
-                    const winEmbed = new discord.MessageEmbed()
-                    .setTitle("The ball landed on " + colour + " " + num )
-                    .setDescription("You Win " + wager + " Moneys!")
-                    .setColor("#0f5718")
-                    message.channel.send(winEmbed)
-                }
-                //lose case
-                else{
-                    let finalMoneys = currentMoneys - newMoneys;
-                    let prepareUpdate = sql.prepare(`UPDATE data SET userMoneys = ? WHERE userID = ?`)
-                    prepareUpdate.run(finalMoneys, userID);
+                        const winEmbed = new discord.MessageEmbed()
+                        .setTitle("The ball landed on " + colour + " " + num )
+                        .setDescription("You Win " + wager + " Moneys!")
+                        .setColor("#0f5718")
+                        message.channel.send(winEmbed)
+                    }
+                    //lose case
+                    else {
+                        let finalMoneys = currentMoneys - newMoneys;
+                        let prepareUpdate = sql.prepare(`UPDATE data SET userMoneys = ? WHERE userID = ?`)
+                        prepareUpdate.run(finalMoneys, userID);
 
-                    const loseEmbed = new discord.MessageEmbed()
-                    .setTitle("The ball landed on " + colour + " " + num )
-                    .setDescription("You Lost " + wager + " Moneys!")
-                    .setColor("#ec2727")
-                    message.channel.send(loseEmbed)
-                }
-            }
-            //if number guess
-            if(guessType === "number" || guessType === "numbers"){
-                //win case
-                if (guess === group){
-                    let finalMoneys = newMoneys + currentMoneys
-                    let prepareUpdate = sql.prepare(`UPDATE data SET userMoneys = ? WHERE userID = ?`)
-                    prepareUpdate.run(finalMoneys, userID);
-
-                    const winEmbed = new discord.MessageEmbed()
-                    .setTitle("The ball landed on " + colour + " " + num )
-                    .setDescription("You Win " + wager + " Moneys!")
-                    .setColor("#0f5718")
-                    message.channel.send(winEmbed)
-                }
-                //lose case
-                else{
-                    let finalMoneys = currentMoneys - newMoneys;
-                    let prepareUpdate = sql.prepare(`UPDATE data SET userMoneys = ? WHERE userID = ?`)
-                    prepareUpdate.run(finalMoneys, userID);
-
-                    const loseEmbed = new discord.MessageEmbed()
-                    .setTitle("The ball landed on " + colour + " " + num )
-                    .setDescription("You Lost " + wager + " Moneys!")
-                    .setColor("#ec2727")
-                    message.channel.send(loseEmbed)
+                        const loseEmbed = new discord.MessageEmbed()
+                        .setTitle("The ball landed on " + colour + " " + num )
+                        .setDescription("You Lost " + wager + " Moneys!")
+                        .setColor("#ec2727")
+                        message.channel.send(loseEmbed)
+                    }
                 }
             }
         }

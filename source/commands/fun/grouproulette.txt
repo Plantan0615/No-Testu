@@ -278,7 +278,7 @@ else if(guessType && guess){
 }
 
 module.exports.help = {
-    name: "roulette",
+    name: "roulette3",
     category: "fun",
     usage: `Template: PREFIXroulette5050 guess-type betting-option wager\n Example (black): PREFIXroulette5050 colour black 5 \nExample (red): PREFIXroulette5050 colour red 5 \n Example (even): PREFIXroulette5050 even/odd even 5 \nExample (odd): PREFIXroulette5050 even/odd odd 5 \nExample (numbers 1-18):PREFIXroulette5050 numbers low 5 \nExample (numbers 19-37):PREFIXroulette5050 numbers high 5`,
     description: "To bet on groups of the roulette wheel. Type the command, then a guess type (colour, even/odd, numbers), your betting option(black, red; even, odd; low (for numbers 1-18), high (for numbers 19-37)), and how many Moneys you want to bet (Separated with spaces). I will spin the wheel and tell you if you've won."

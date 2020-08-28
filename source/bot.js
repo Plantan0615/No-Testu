@@ -19,6 +19,7 @@ async function registerCommands(dir = "commands") {
                 let cmdName = file.substring(0, file.indexOf(".js"));
                 try{
                 let cmdModule = require(path.join(__dirname, dir, file));
+                // Remember: cmdModule.help.name = the file module.export.help -> name
                 client.commands.set(cmdModule.help.name, cmdModule);
                 }
                 catch (err) {
@@ -60,7 +61,7 @@ async function main() {
     await registerEvents()
 
     // Set up MySQL
-    const sql = require("better-sqlite3")("../../userInfo.db");
+    const sql = require("better-sqlite3")("C:\\Users\\chase\\Desktop\\Coding\\No Testu\\source\\userInfo.db");
     client.sql = sql
 
     // Start Bot
