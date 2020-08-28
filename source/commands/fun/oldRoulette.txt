@@ -1,0 +1,182 @@
+OLD ROULETTE
+const sql = require("better-sqlite3")("/Users/chase/Desktop/Coding/No Botto/source/userInfo.db");
+const discord = require("discord.js");
+module.exports.run = async(client, message, args) => {
+// roulette functions
+//wheel
+var wheel ={
+    0: "green", 
+    1: "black", 
+    2: "red"
+};
+//pick colour
+function pickColour() {
+    return(wheel [Object.keys(wheel)[Math.floor(Math.random() * Object.keys(wheel).length)]])
+};
+var colour = pickColour();
+//declare nums
+    var greenNums = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+    var blackNums = [16, 5, 3, 18, 7, 14, 12, 9, 11, 25, 34, 21, 32, 23, 30, 29, 36, 27]
+    var redNums = [33, 20, 22, 26, 35, 28, 37, 31, 24, 6, 17, 2, 15, 10, 19, 8, 13, 4]
+        //pick black num
+        if (colour === "black"){
+        function pickBlackNum (){
+            return blackNums[Math.floor(Math.random() * blackNums.length)]};
+        var num = pickBlackNum();}
+        //pick red num
+        else if (colour === "red"){
+        function pickRedNum (){
+            return redNums[Math.floor(Math.random() * redNums.length)]};
+        var num = pickRedNum();}
+        //pick green num
+        else if (colour === "green"){
+        function pickGreenNum (){
+            return greenNums[Math.floor(Math.random() * greenNums.length)]};
+        var num = pickGreenNum();}
+        //catch error
+        else {console.log("error");}
+            //check if number is even
+            function isEven() {
+                if (num % 2 == 0)
+                    return ("even");
+                    else 
+                    return ("odd");
+                }
+                    var compare = isEven();
+                    //check what group number is in
+                    function numGroup(){
+                    if (num <= 18)
+                        return ("group1"); //low 
+                    else
+                        return ("group2"); //high
+                    }
+                    var group = numGroup();
+//user input
+let msgArray = args
+let colourGuess =(msgArray[0]);//colour guess type
+let numGuess = parseInt(msgArray[1]); //number guess
+let wager = (msgArray[2]); //wager wager
+//if no colour guess
+if(!colourGuess){
+    message.delete({ timeout: 2000 })
+        message.channel.send("No Colour Provided. Please type black, red, or green after the roulette command.")
+            .then(msg => msg.delete({timeout: 2000}))
+            .catch(err => console.log(err));
+}
+//if invalid colour
+else if(colourGuess !== "black" && colourGuess !== "red" && colourGuess !== "green"){
+    message.delete({ timeout: 2000 })
+        message.channel.send("Invalid Colour. Please type black, red, or green after the roulette command.")
+            .then(msg => msg.delete({timeout: 2000}))
+            .catch(err => console.log(err));
+}
+//if no number guess
+else if(!numGuess){
+    message.delete({ timeout: 2000 })
+        message.channel.send("No Number Provided. Please type a number between 1 and 37 after the colour.")
+            .then(msg => msg.delete({timeout: 2000}))
+            .catch(err => console.log(err));
+}
+//if number is too high
+else if(numGuess > "37"){
+    message.delete({ timeout: 2000 })
+        message.channel.send("Invalid Number. Please type a number between 0 and 36 after the colour.")
+            .then(msg => msg.delete({timeout: 2000}))
+            .catch(err => console.log(err));
+}
+//if no wager
+else if(!wager){
+    message.delete({ timeout: 2000 })
+        message.channel.send("No wager provided. Please type the amount of Moneys you would like to bet (after the Roulette Wheel Number/Betting Option).")
+            .then(msg => msg.delete({timeout: 3000}))
+            .catch(err => console.log(err));
+}
+//if num and colour guess
+else if(colourGuess && numGuess){
+    let isValidRed = [33, 20, 22, 26, 35, 28, 37, 31, 24, 6, 17, 2, 15, 10, 19, 8, 13, 4]
+    let isValidBlack = [16, 5, 3, 18, 7, 14, 12, 9, 11, 25, 34, 21, 32, 23, 30, 29, 36, 27]
+    let isValidGreen = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        var valid;
+    if(colourGuess === "red"){valid = isValidRed.includes(numGuess)}
+    else if(colourGuess === "black"){valid = isValidBlack.includes(numGuess)}
+    else if(colourGuess === "green"){valid = isValidGreen.includes(numGuess)};
+    //if invalid num 
+    if (valid === false){
+        message.delete({timeout: 2000})
+        message.channel.send("Number/Colour combination does not exist. (If you need help- Look at a Roulette Wheel and add 1 to the number you want to bet on.)")
+        .then(msg => msg.delete({timeout: 3000}))
+        .catch(err => console.log(err));
+        return;
+    }
+//if all is well
+else{
+    let userID = message.author.id
+    let prepareStatement = sql.prepare("SELECT * FROM data WHERE userID = ?")
+    let userXpObject= prepareStatement.get(`${userID}`)
+        let newMoneys = parseInt(wager);
+        let currentMoneys = userXpObject["userMoneys"];
+        //if wager is NAN
+        if(isNaN(newMoneys)){
+            message.delete({ timeout: 2000 })
+            message.channel.send("Your wager must be a number!")
+                .then(msg => msg.delete({timeout: 2000}))
+                .catch(err => console.log(err));
+            return;
+        }
+        //if wager > moneys
+        if (wager > currentMoneys){
+            message.delete({ timeout: 2000 })
+            message.channel.send("Your wager is higher than the Moneys you have!")
+                .then(msg => msg.delete({timeout: 2000}))
+                .catch(err => console.log(err));
+                return;
+        }
+        //if colour is right
+        if (colourGuess === colour) {
+            //win case
+            if (numGuess === num){
+                let finalMoneys = newMoneys + currentMoneys
+                let prepareUpdate = sql.prepare(`UPDATE data SET userMoneys = ? WHERE userID = ?`)
+                prepareUpdate.run(finalMoneys, userID);
+
+                const winEmbed = new discord.MessageEmbed()
+                .setTitle("The ball landed on " + colour + " " + num )
+                .setDescription("You Win " + wager + " Moneys!")
+                .setColor("#0f5718")
+                message.channel.send(winEmbed)
+                }
+            //lose case
+            else if(numGuess !== num){
+                let finalMoneys = currentMoneys - newMoneys;
+                let prepareUpdate = sql.prepare(`UPDATE data SET userMoneys = ? WHERE userID = ?`)
+                prepareUpdate.run(finalMoneys, userID);
+
+                const loseEmbed = new discord.MessageEmbed()
+                .setTitle("The ball landed on " + colour + " " + num )
+                .setDescription("You Lost " + wager + " Moneys!")
+                .setColor("#ec2727")
+                message.channel.send(loseEmbed)
+                }
+            }
+        //if colour is wrong- lose case
+        else if (colourGuess !== colour){
+                let finalMoneys = currentMoneys - newMoneys;
+                let prepareUpdate = sql.prepare(`UPDATE data SET userMoneys = ? WHERE userID = ?`)
+                prepareUpdate.run(finalMoneys, userID);
+
+                const loseEmbed = new discord.MessageEmbed()
+                .setTitle("The ball landed on " + colour + " " + num )
+                .setDescription("You Lost " + wager + " Moneys!")
+                .setColor("#ec2727")
+                message.channel.send(loseEmbed)
+            }      
+        }
+    }
+};
+
+module.exports.help = {
+    name: "roulette",
+    category: "fun",
+    usage: `Template: PREFIXroulette colour number wager\nExample (for black): PREFIXroulette black 16 5\nExample (for red): PREFIXroulette red 17 5 \nExample (for green): PREFIXroulette green 1 5`,
+    description: "To bet on a single number of the roulette wheel. Type the roulette command and then a colour(black, red, or green), then a number (between 1-37), and how many Moneys you want to bet (Separated with spaces). I will spin the wheel and tell you if you've won."
+}
