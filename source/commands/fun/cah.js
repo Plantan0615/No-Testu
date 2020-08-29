@@ -2,9 +2,13 @@ const Shuffle = require("shuffle");
 const Discord = require("discord.js");
 module.exports.run = async (client, message, args) => {
 //filter and input variables
-const filter = m => m.content.includes("playing");
+const filter = (m) => {
+    return ["playing", "plays", "play", "player"].includes(m.content.toLowerCase())
+};
 var num;
 var pts;
+var handEmbed;
+var cDM = [];
 var players = [];
 const userArr = []
 const nameArr = []
@@ -48,7 +52,7 @@ const playArr = [];
             let data = null
             let collected = await message.channel.awaitMessages(filter, {
                 max: num,
-                time: 60000,
+                time: 300000,
                 errors: ["time"]
             }).catch(er => {
                 data = er
@@ -61,7 +65,7 @@ const playArr = [];
             for (let i = 0; i < collectArr.length; i++) {
                 userArr.push(collectArr[i].author.id)
                 nameArr.push(collectArr[i].author.username)
-            }
+            } console.log(userArr, nameArr)
         }
         //too many players error
         else if (num > 10) {
@@ -137,8 +141,7 @@ const playArr = [];
         }
     }
     //send cards via dm
-    var handEmbed;
-    var cDM = [];
+
     for (let i = 0; i < players.length; i++) {
         if (players[i].czar === false) {
             handEmbed = new Discord.MessageEmbed()
@@ -158,6 +161,7 @@ const playArr = [];
             }
         }
         let user = client.users.cache.get(`${userArr[i]}`)
+        console.log(user)
         cDM[i] = await user.send({
            embed: handEmbed
         })
@@ -175,6 +179,9 @@ var discard;
 var currentPts, newPts
 var posi, czName, currentCzID;
 var newCard;
+var result;
+var newCz;
+var newCDM = []
     //get random black card
     const bDealt = bDeck.draw(1);
     //czar function
@@ -195,7 +202,7 @@ var newCard;
     let newNum = num - 1
     let collected = await message.channel.awaitMessages(cardFilter, {
         max: newNum,
-        time: 60000,
+        time: 300000,
         errors: ["time"]
     }).catch(er => {
         data = er
@@ -210,7 +217,6 @@ var newCard;
         cardNums.push(collectArr2[i].content);
     }
     findPlayerCard(); // we now have array of all the chosen cards, player hand has been edited
-
     //send new black/white combo embed
     const oldEmbed = currentEmbed.embeds.length >= 1 ? currentEmbed.embeds[0] : null
     const comboEmbed = oldEmbed != null ? new Discord.MessageEmbed(oldEmbed) : new Discord.MessageEmbed()
@@ -224,14 +230,14 @@ var newCard;
 //let czar pick best card
     //check if czar is true
     const czarFilter = (msg) => {
-        return ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"].includes(msg.content.toLowerCase()) && currentCzID === msg.author.id
+        return ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"].includes(msg.content.toLowerCase()) && currentCzID === msg.author.id && parseInt(msg.content) < num
     };
     //await czar message
         //collect messages
         let data2 = null
         let collected2 = await message.channel.awaitMessages(czarFilter, {
             max: 1,
-            time: 60000,
+            time: 300000,
             errors: ["time"]
         }).catch(er => {
             data2 = er
@@ -263,17 +269,17 @@ var newCard;
     await currentEmbed.edit({embed: comboEmbed1});
     await message.channel.bulkDelete(1);
     //put discarded black card on bottom of black deck   
-    bdeck.putOnBottomOfDeck(bDealt)
+    bDeck.putOnBottomOfDeck(bDealt);
     //check points
     checkPoints();
+    //assign players a new card
+    assignNewCards();
     //assign czar to next player
     assignCzar();
     //change czar to false
     removeCzar();
-    //assign players a new card
-    assignNewCards();
     //send new hand embeds
-    var newCDM = []
+
     for (let i = 0; i < players.length; i++) {
         const oldDM = cDM[i].embeds.length >= 1 ? cDM[i].embeds[0] : null
         const newDM= oldDM != null ? new Discord.MessageEmbed(oldDM) : new Discord.MessageEmbed()
@@ -297,12 +303,6 @@ var newCard;
     }
     //send new black card- begin loop again
 //FUNCTIONS
-    function checkPoints() {
-        for (var i = 0; i < players.length; i++) {
-            ptsArr[i] = players[i].points //creates array of points
-        }
-    }
-
     function checkCzar() {
         for (var i = 0; i < players.length; i++) {
             czarArr[i] = players[i].czar //gets czar value of player at position i and populates array
@@ -313,7 +313,34 @@ var newCard;
             currentCzID = players[posi].userID //user ID of current czar (at true index)
         }
     }
-var newCz;
+    function findPlayerCard() {
+        for (var i = 0; i < newUserArr.length; i++) {
+            player = players.find(item => item.userID === newUserArr[i]); //finds the player's userID
+            value = parseInt(cardNums[i]) - 1 //parses user input into index num
+            pCard = player.hand[value] //gets the index number of that card in the players hand
+            cardsArr.push(player.hand[value]) //creates array of chosen cards
+            discard = player.hand.splice(value, 1)//creates discard pile and removes from hand
+            wdeck.putOnBottomOfDeck(discard)//puts discard on bottom of deck
+        }
+    }
+    function assignPts(){
+        currentPts = winUser.points //gets current points
+        newPts = currentPts + 1 //adds another point
+        return winUser.points = newPts //updates current points to new
+    } 
+    function checkPoints() {
+        for (var i = 0; i < players.length; i++) {
+            ptsArr[i] = players[i].points //creates array of points
+        }
+    }
+    function assignNewCards(){
+        for(i = 0; i < (players.length); i++) {
+            if (players[i].czar === false){
+                newCard = wdeck.draw(1);//draws new card
+                players[i].hand.push(newCard)//adds card to player's hand
+            }
+        }
+    }
     function assignCzar() {
         for (var i = 0; i < players.length; i++) {
             czarArr[i] = players[i].czar //gets czar value of player at position i and populates array
@@ -321,7 +348,7 @@ var newCz;
         if (czarArr.includes(true)) {
             posi = czarArr.indexOf(true)//gets index of true in czar arr
             newPos = posi + 1 //add one to make index increase by 1 (to get next player obj)
-            if (newPos >= czarArr.length){ //if newPos is > = length of czar arr
+            if (newPos >= czarArr.length){ //if newPos is > = length of czar arr (if we are at end of array)
                 newPos = 0 //reset new position (because we are back at 0)
                 newCz = players[newPos] //gets player obj of next czar at end of array (position 0)
                 if (newCz.czar === false) { //if czar is false
@@ -335,7 +362,6 @@ var newCz;
             }
         }
     }
-var result;
     function removeCzar() {
         for (var i = 0; i < players.length; i++) {
             czarArr[i] = players[i].czar //gets czar value of player at position i and populates array
@@ -380,30 +406,6 @@ var result;
             } 
         }
     }
-
-    function findPlayerCard() {
-        for (var i = 0; i < newUserArr.length; i++) {
-            player = players.find(item => item.userID === newUserArr[i]); //finds the player's userID
-            value = parseInt(cardNums[i]) - 1 //parses user input into index num
-            pCard = player.hand[value] //gets the index number of that card in the players hand
-            cardsArr.push(player.hand[value]) //creates array of chosen cards
-            discard = player.hand.splice(value, 1)//creates discard pile and removes from hand
-            wdeck.putOnBottomOfDeck(discard)//puts discard on bottom of deck
-        }
-    }
-
-    function assignNewCards(){
-        for(i = 0; i < (players.length); i++) {
-            newCard = wdeck.draw(1);//draws new card
-            players[i].hand.push(newCard)//adds card to player's hand
-        }
-    }
-
-    function assignPts(){
-        currentPts = winUser.points //gets current points
-        newPts = currentPts + 1 //adds another point
-        return winUser.points = newPts //updates current points to new
-        }  
 } while(!ptsArr.includes(pts));
     if (ptsArr.includes(pts)) {
         var pos = ptsArr.indexOf(pts)//gets index of where pts = points earned

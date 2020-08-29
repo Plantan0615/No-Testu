@@ -10,7 +10,7 @@ module.exports.run = async(client, message, args) => {
 
     module.exports.help = {
         name: "anity",
-        category: "useful",
+        category: "antony",
         usage: `Template/Example: PREFIXanity`,
-        description: "ant tryna figure stuff out"
+        description: "ant's sanity clone"
     }

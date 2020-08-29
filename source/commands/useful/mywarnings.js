@@ -1,4 +1,4 @@
-const sql = require("better-sqlite3")("/Users/chase/Desktop/Coding/No Botto/source/userInfo.db");
+const sql = require("better-sqlite3")("/Users/chase/Desktop/Coding/No Testu/source/userInfo.db");
 const discord = require("discord.js");
 module.exports.run = async(client, message, args) => {
 let userID = message.author.id
