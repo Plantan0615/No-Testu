@@ -7,7 +7,7 @@ let role = cache.find(role => role.name === "I Need to Read the Rules");
 let newRole = cache.find(role => role.name === "Noobz");
 //user input
     let passwordGuess = message.content.substring(10);
-    const password = "PxTc"
+    const password = "meow"
 //if no password guess
 if(!passwordGuess){
     message.delete();

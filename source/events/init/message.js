@@ -36,10 +36,11 @@ module.exports = async(client, message) => {
         message.channel.send("Hey! There are more channels! You just need to read the rules and type the password (in this channel) to unlock them.")
     }
     //if sentence starts with I'm
-    let isValid = ["I'm ", "Im ", "i'm ", "im "]
-    if (isValid.some(word => message.content.startsWith(word))){
-        if(message.channel.id === "649178353471062016"){return;}// if vent and advice channel
+    let isValid = ["I'm ", "Im ", "i'm ", "im ", "i'M ", "iM "]
+    if (isValid.some(word => message.content.toLowerCase().trim().startsWith(word.trim().toLowerCase()))) {
+        if(message.channel.id === "649178353471062016") { return; }// if vent and advice channel
         let msgArr = message.content.split(" "); //create array
+        console.log(msgArr.length, msgArr.length <= 5, msgArr)
         if (msgArr.length <= 5){//if array is less than 5 long
             msgArr.shift(); //remove I'm
             let words = msgArr.join(" ");//recreate string

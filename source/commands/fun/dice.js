@@ -16,6 +16,7 @@ module.exports.run = async(client, message, args) => {
    }
     var compare = isEven();
 // userinput
+let isValid = ["even", "odd"]
 var evenOdd = (args[0]);
 let wager = (args[1]);
 //if no even/odd provided
@@ -33,7 +34,7 @@ let wager = (args[1]);
                 .catch(err => console.log(err));
             }
 // if all is provided
-    else {
+    else if (isValid.includes(evenOdd)) {
     let userID = message.author.id
     let prepareStatement = sql.prepare("SELECT * FROM data WHERE userID = ?")
     let userXpObject= prepareStatement.get(`${userID}`)

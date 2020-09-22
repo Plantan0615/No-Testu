@@ -141,7 +141,6 @@ const playArr = [];
         }
     }
     //send cards via dm
-
     for (let i = 0; i < players.length; i++) {
         if (players[i].czar === false) {
             handEmbed = new Discord.MessageEmbed()
@@ -279,7 +278,6 @@ var newCDM = []
     //change czar to false
     removeCzar();
     //send new hand embeds
-
     for (let i = 0; i < players.length; i++) {
         const oldDM = cDM[i].embeds.length >= 1 ? cDM[i].embeds[0] : null
         const newDM= oldDM != null ? new Discord.MessageEmbed(oldDM) : new Discord.MessageEmbed()
