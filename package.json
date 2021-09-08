@@ -15,17 +15,17 @@
   "license": "ISC",
   "dependencies": {
     "axios": "^0.19.2",
-    "better-sqlite3": "^7.1.0",
+    "better-sqlite3": "^7.4.3",
     "card-dealer": "^2.0.0",
-    "discord.js": "^12.2.0",
-    "dotenv": "^8.2.0",
-    "node-emoji": "^1.10.0",
-    "node-gyp": "^7.0.0",
-    "shuffle": "^0.2.2",
+    "discord.js": "^12.5.3",
+    "dotenv": "^8.6.0",
+    "node-emoji": "^1.11.0",
+    "node-gyp": "^7.1.2",
+    "shuffle": "^0.2.5",
     "tree-model": "^1.0.7"
   },
   "devDependencies": {
-    "eslint": "^7.6.0",
+    "eslint": "^7.32.0",
     "javascript-state-machine": "^3.1.0"
   }
 }
